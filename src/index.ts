@@ -1,12 +1,9 @@
 import express from "express";
 import cors from "cors";
-const { MongoClient } = require('mongodb');
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
-const database = 'keeru9';
-import { gameRoutes } from "./routes/gameRoutes";
-const url = 'mongodb+srv://manohar:Manohar123@cluster0.sholwmt.mongodb.net/?retryWrites=true&w=majority';
-const client = new MongoClient(url);
+import router from "./routes";
+import sequelize from "./config/dbConnection";
 
 dotenv.config();
 
@@ -21,24 +18,40 @@ app.use(bodyParser.json());
 
 // Configure all apis
 app.get('/', (req, res) => {
-    
+
     res.json({
-        status: "working"
+        status: "NO DATA"
     })
 })
 
-app.get('/about', (req, res) => {
-    res.json({
-        status: "Here is about api working"
-    })
-})
+app.use('/api', router);
 
-app.use('/api/games', gameRoutes);
+const doc = {
+    info: {
+        title: 'omni-api',
+        description: '',
+    },
+    host: 'localhost:5000',
+    schemes: ['http'],
+};
+
+const outputFile = './swagger/swagger.json';
+const endpointsFiles = ['./index.ts'];
+
+/* NOTE: if you use the express Router, you must pass in the 
+    'endpointsFiles' only the root file where the route starts,
+    such as index.js, app.js, routes.js, ... */
 
 // Start the server
 async function initialise() {
     try {
-        await client.connect();
+        await sequelize.authenticate();
+
+        // await swaggerAutogen(outputFile, endpointsFiles, doc);
+
+        /* // let express to use this
+        app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(doc)); */
+
         app.listen(port, () => {
             console.log(`Listening on: ${port}`)
         });
