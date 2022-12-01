@@ -1,8 +1,9 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, Sequelize, DataTypes } from 'sequelize';
+import { Model, InferAttributes, InferCreationAttributes, CreationOptional, Sequelize, DataTypes, NonAttribute } from 'sequelize';
 import sequelize from '../config/dbConnection';
+import Category from './Category';
 import CategoryGames from './CategoryGames';
-import Tag from './Tag';
-import TagsGames from './TagsGames';
+import Tag, { TagType } from './Tag';
+import TagsGames, { TagsGamesType } from './TagsGames';
 
 // order of InferAttributes & InferCreationAttributes is important.
 class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
@@ -13,8 +14,15 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
     declare url: string;
     declare description: string;
     declare thumbnail: string;
+    declare featured: boolean;
+    declare popular: boolean;
+    declare top_rated: boolean;
     declare gif_url: string;
     declare game_type: string;
+    declare creation_date: CreationOptional<string>;
+    declare updated_date: CreationOptional<string>;
+
+    declare tags: NonAttribute<TagsGamesType[]>;
 }
 
 export type {
@@ -43,6 +51,18 @@ export default Game.init({
         type: new DataTypes.STRING(200),
         allowNull: false
     },
+    featured: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false
+    },
+    popular: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false
+    },
+    top_rated: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false
+    },
     gif_url: {
         type: new DataTypes.STRING(200),
         allowNull: false
@@ -50,11 +70,20 @@ export default Game.init({
     game_type: {
         type: new DataTypes.STRING(20),
         allowNull: false
-    }
+    },
+    creation_date: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
+    updated_date: {
+        type: DataTypes.DATE,
+        allowNull: true
+    },
 }, {
     tableName: "tbl_games",
     sequelize: sequelize,
-    timestamps: false
+    updatedAt: "updated_date",
+    createdAt: "creation_date"
 })
 
 /* Game.hasMany(TagsGames, {

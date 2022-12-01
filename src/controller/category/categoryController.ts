@@ -10,7 +10,7 @@ export async function categoryList(req: Request<any, any, any, any>, res: Respon
 }
 
 export async function categoryGamesList(req: Request<any, any, any, any>, res: Response) {
-    res.status(200).json(await Category.findAll({
+    const response = await Category.findAll({
         include: {
             model: CategoryGames,
             as: "games",
@@ -23,6 +23,14 @@ export async function categoryGamesList(req: Request<any, any, any, any>, res: R
                     foreignKey: "game_id"
                 }
             ]
+        }
+    })
+    res.status(200).json(response.map(e => {
+        return {
+            ...e.dataValues,
+            games: e.games.map(ele => {
+                return ele.game
+            })
         }
     }));
 }

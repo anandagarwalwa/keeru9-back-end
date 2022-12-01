@@ -5,6 +5,11 @@ export type ICreateGameReq = {
     thumbnail: string;
     gif_url: string;
     game_type: string;
+    category_id: number;
+    tags: number[];
+    featured: boolean;
+    popular: boolean;
+    top_rated: boolean;
 }
 
 export type ISearchGamesQuery = {

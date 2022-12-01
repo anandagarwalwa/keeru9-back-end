@@ -10,4 +10,4 @@ router.use('/games', gameRoutes);
 router.use('/tags', tagRoutes);
 router.use('/category', categoryRouter);
 
-export default router
+export default router;

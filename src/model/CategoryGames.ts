@@ -39,12 +39,17 @@ export default CategoryGames.init({
 }, {
     tableName: "tbl_category_games",
     sequelize: sequelize,
-    updatedAt: "updated_date",
-    createdAt: "creation_date"
+    timestamps: false
 })
 
 
 CategoryGames.belongsTo(Game, {
     as: "game",
     foreignKey: 'game_id',
+})
+
+Game.belongsTo(CategoryGames, {
+    foreignKey: 'id',
+    targetKey: 'game_id',
+    as: "category"
 })

@@ -1,4 +1,4 @@
-import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, ForeignKey } from 'sequelize';
+import { Model, InferAttributes, InferCreationAttributes, CreationOptional, DataTypes, ForeignKey, NonAttribute } from 'sequelize';
 import sequelize from '../config/dbConnection';
 import Category, { CategoryType } from './Category';
 import Game, { GameType } from './Game';
@@ -8,6 +8,9 @@ class TagsGames extends Model<InferAttributes<TagsGames>, InferCreationAttribute
     declare id: CreationOptional<number>;
     declare tag_id: ForeignKey<TagType['id']>;
     declare game_id: ForeignKey<GameType['id']>;
+
+    declare game: NonAttribute<GameType>
+    declare tag: NonAttribute<TagType>
 }
 
 export type {

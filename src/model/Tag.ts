@@ -7,6 +7,7 @@ class Tag extends Model<InferAttributes<Tag>, InferCreationAttributes<Tag>> {
     // when creating an instance of the model (such as using Model.create()).
     declare id: CreationOptional<number>;
     declare name: string;
+    declare image: string;
     declare color: string;
     declare creation_date: CreationOptional<string>;
     declare updated_date: CreationOptional<string>;
@@ -30,6 +31,10 @@ export default Tag.init({
     },
     color: {
         type: new DataTypes.STRING(9),
+        allowNull: false
+    },
+    image: {
+        type: new DataTypes.STRING(255),
         allowNull: false
     },
     creation_date: {
