@@ -44,7 +44,7 @@ export default Game.init({
         allowNull: false
     },
     description: {
-        type: new DataTypes.STRING(1500),
+        type: DataTypes.TEXT,
         allowNull: false
     },
     thumbnail: {

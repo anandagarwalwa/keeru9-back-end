@@ -48,12 +48,14 @@ export async function createGame(req: Request<any, any, ICreateGameReq>, res: Re
             }), { transaction })
 
             await transaction.commit();
-            return res.status(200).json(gameResponse.toJSON())
+            return res.status(200).json(gameResponse.dataValues)
         } else {
             await transaction.rollback();
+            console.log("======== CHECKING");
             res.status(500).send({ error: "Unable to create game right now." })
         }
     } catch (error) {
+        console.log(error);
         await transaction.rollback();
         res.status(500).send({ error })
     }
@@ -107,7 +109,7 @@ export async function getGameDetail(req: Request<IGameDetailParam>, res: Respons
                 return e.game.dataValues
             }).filter(ele => {
                 console.log(response.id, ele.id);
-                
+
                 if (ele.id != initialGameId) {
                     initialGameId = ele.id
                     return response.id !== ele.id
