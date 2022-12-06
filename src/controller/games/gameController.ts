@@ -1,7 +1,9 @@
+import axios from "axios";
 import e from "cors";
 import { Request, Response } from "express";
 import { Op } from 'sequelize';
 import sequelize from "../../config/dbConnection";
+import { seedingData } from "../../constants";
 import { ICreateGameReq, IGameDetailParam, ISearchGamesQuery } from "../../dto/games";
 import Category from "../../model/Category";
 import CategoryGames from "../../model/CategoryGames";
@@ -52,12 +54,12 @@ export async function createGame(req: Request<any, any, ICreateGameReq>, res: Re
         } else {
             await transaction.rollback();
             console.log("======== CHECKING");
-            res.status(500).send({ error: "Unable to create game right now." })
+            return res.status(500).send({ error: "Unable to create game right now." })
         }
     } catch (error) {
         console.log(error);
         await transaction.rollback();
-        res.status(500).send({ error })
+        return res.status(500).send({ error })
     }
 }
 
@@ -218,6 +220,119 @@ export async function updateGame(req: Request<IGameDetailParam, any, ICreateGame
 
 
     } catch (error) {
+        res.status(500).send({ error })
+    }
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+export async function importDummy(req: Request, res: Response) {
+    const transaction = await sequelize.transaction();
+    try {
+        const response = { data: seedingData }
+
+        const unfilteredCats = response.data.map((e: any) => e.category);
+        var finalCategories: any[] = [];
+        unfilteredCats.forEach((e: any) => {
+            if (!finalCategories.includes(e)) {
+                finalCategories.push(e);
+            }
+        });
+
+        const unfilteredTags = response.data.map((e: any) => e.tags.split(",")).flat();
+
+        var finalTags: any[] = []
+        unfilteredTags.forEach((e: any) => {
+            if (!finalTags.includes(e)) {
+                finalTags.push(e)
+            }
+        })
+        console.log(finalTags);
+
+        const tagResponse = await Tag.bulkCreate(finalTags.map(e => {
+            return {
+                image: 'https://fujifilm-x.com/wp-content/uploads/2019/08/xc16-50mmf35-56-ois-2_sample-images03.jpg',
+                name: e.trim(),
+                color: getRandomColor()
+            }
+        }), { transaction })
+
+        const catResponse = await Category.bulkCreate(finalCategories.map((e: any) => {
+            return {
+                name: e.trim(),
+            }
+        }), { transaction })
+
+        const allDBCats = catResponse;
+
+        const allCatsJson: { [key: string]: number } = {}
+        allDBCats.forEach(e => {
+            allCatsJson[e.name] = e.id
+        })
+
+        const allDBTags = tagResponse;
+
+        const allTagsJson: { [key: string]: number } = {}
+        allDBTags.forEach(e => {
+            allTagsJson[e.name] = e.id
+        })
+
+        const replacedCats = response.data.map(e => {
+            const allTagsSplit = e.tags.split(",").map(e => e.trim())
+            const tagsWithIds = allTagsSplit.map(e => allTagsJson[e.trim() as any])
+            return {
+                name: e.title,
+                url: e.url,
+                description: e.description,
+                thumbnail: e.thumb,
+                gif_url: e.thumb,
+                game_type: 'B',
+                category_id: allCatsJson[e.category.trim() as any],
+                tags: tagsWithIds,
+                featured: false,
+                popular: false,
+                top_rated: false,
+                height: parseInt(e.height),
+                width: parseInt(e.width)
+            } as ICreateGameReq
+        }) as ICreateGameReq[]
+
+        const addedGames = await Game.bulkCreate(replacedCats, { transaction });
+
+        const catGamesToAdd = addedGames.map((e, index) => {
+            return {
+                category_id: replacedCats[index].category_id,
+                game_id: e.id
+            }
+        })
+
+        const addCatGames = await CategoryGames.bulkCreate(catGamesToAdd, { transaction })
+
+        const tagGamesToAdd = replacedCats.map((e, index) => {
+            return e.tags.map(ele => {
+                return {
+                    game_id: addedGames[index].id,
+                    tag_id: ele
+                }
+            })
+        }).flat()
+
+        const addTagGames = await TagsGames.bulkCreate(tagGamesToAdd, { transaction })
+
+        await transaction.commit()
+
+        return res.status(200).json({ status: "done" })
+    } catch (error) {
+        console.log(error);
+
+        await transaction.rollback();
         res.status(500).send({ error })
     }
 }

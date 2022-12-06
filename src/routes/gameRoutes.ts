@@ -1,10 +1,11 @@
 import express from "express";
-import { createGame, deleteGame, featuredGameList, gameList, getGameDetail, popularGameList, searchGameList, updateGame } from "../controller/games/gameController";
+import { createGame, deleteGame, featuredGameList, gameList, getGameDetail, importDummy, popularGameList, searchGameList, updateGame } from "../controller/games/gameController";
 import { categoryList } from "../controller/category/categoryController";
 
 const router = express.Router();
 
 router.get('/', gameList);
+// router.post('/seed', importDummy);
 router.get('/featured', featuredGameList);
 router.get('/popular', popularGameList);
 router.get('/search', searchGameList);

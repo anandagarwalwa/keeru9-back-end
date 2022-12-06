@@ -6,6 +6,8 @@ export type ICreateGameReq = {
     gif_url: string;
     game_type: string;
     category_id: number;
+    height: number;
+    width: number;
     tags: number[];
     featured: boolean;
     popular: boolean;

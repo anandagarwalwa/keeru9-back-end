@@ -19,6 +19,8 @@ class Game extends Model<InferAttributes<Game>, InferCreationAttributes<Game>> {
     declare top_rated: boolean;
     declare gif_url: string;
     declare game_type: string;
+    declare height: number;
+    declare width: number;
     declare creation_date: CreationOptional<string>;
     declare updated_date: CreationOptional<string>;
 
@@ -69,6 +71,14 @@ export default Game.init({
     },
     game_type: {
         type: new DataTypes.STRING(20),
+        allowNull: false
+    },
+    height: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        allowNull: false
+    },
+    width: {
+        type: DataTypes.INTEGER.UNSIGNED,
         allowNull: false
     },
     creation_date: {
