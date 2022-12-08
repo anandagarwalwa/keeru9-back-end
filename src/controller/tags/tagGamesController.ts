@@ -20,12 +20,30 @@ export async function tagGamesList(req: Request, res: Response) {
     }))
 }
 
+
+export async function gameListByTagId(req: Request<any, any, {
+    id: number
+}>, res: Response) {
+    res.status(200).json(await TagsGames.findAll({
+        where: {
+            tag_id: req.params.id
+        },
+        include: [
+            {
+                model: Game,
+                as: "game"
+            }
+        ]
+    }))
+
+}
+
 export async function createTagGame(req: Request<any, any, ICreateTagGame>, res: Response) {
-    try{
+    try {
         const response = await TagsGames.create(req.body);
 
         return res.status(200).json(response.toJSON())
-    }catch (error) {
+    } catch (error) {
         res.status(500).send({ error })
     }
 }
